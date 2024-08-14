@@ -1,0 +1,68 @@
+{
+    "mass_properties": {
+        "x_center_of_gravity": 3.0,
+        "z_center_of_gravity": 0
+    },
+    "flight_condition": {
+        "mach_numbers": [0.6],
+        "altitudes": [0],
+        "alpha": [-2, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
+    },
+    "wing_planform": {
+        "x_apex_position": 4.5,
+        "z_apex_position": 0.2,
+        "alignment_angle": 0.0,
+        "root_chord": 4.9,
+        "inboard_panel_chord": 3.0,
+        "inboard_panel_semispan": 1.5,
+        "inboard_panel_sweep": 45.0,
+        "inboard_panel_dihedral": 0.0,
+        "outboard_panel_chord": 1.0,
+        "outboard_panel_semispan": 4.5,
+        "outboard_panel_sweep": 20.0,
+        "outboard_panel_dihedral": -6.0,
+        "sweep_reference_location": 0.25
+    },
+    "wing_section": {
+        "naca_4_series_code": "4409"
+    },
+    "horizontal_tail_planform": {
+        "x_apex_position": 12.10,
+        "z_apex_position": 0.2,
+        "alignment_angle": 0.0,
+        "root_chord": 1.82,
+        "inboard_panel_chord": 1.0,
+        "inboard_panel_semispan": 2.75,
+        "inboard_panel_sweep": 25.0,
+        "inboard_panel_dihedral": 3.0,
+        "outboard_panel_chord": 0.0,
+        "outboard_panel_semispan": 0.0,
+        "outboard_panel_sweep": 0.0,
+        "outboard_panel_dihedral": 0.0,
+        "sweep_reference_location": 0.25
+    },
+    "horizontal_tail_section": {
+        "naca_4_series_code": "0406"
+    },
+    "vertical_tail_planform": {
+        "x_apex_position": 11.2,
+        "z_apex_position": 0.5,
+        "root_chord": 2.75,
+        "inboard_panel_chord": 0.83,
+        "inboard_panel_semispan": 2.75,
+        "inboard_panel_sweep": 45.0,
+        "outboard_panel_chord": 0.0,
+        "outboard_panel_semispan": 0.0,
+        "outboard_panel_sweep": 0.0,
+        "sweep_reference_location": 0.25
+    },
+    "vertical_tail_section": {
+        "naca_4_series_code": "0404"
+    },
+    "fuselage": {
+        "x_stations": [1.0, 2.00,  4.5, 8.9, 12.1, 14.0],
+        "half_widths": [0.4, 0.60, 0.70, 0.65, 0.55, 0.55],
+        "ellipse_ratios": [1.0, 1.0, 1.4, 1.1, 0.8, 0.7],
+        "axis_offsets": [0.0, 0.1, 0.5, 0.2, 0.2, 0.2]
+    }
+}
