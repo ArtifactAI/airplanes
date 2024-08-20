@@ -1,7 +1,10 @@
 import os
 from typing import Union, Dict
 
-from config_map import map_table
+try:
+    from config_map import map_table
+except:
+    from ..config_map import map_table
 
 class ConfigError(Exception):
     pass

@@ -1,7 +1,10 @@
 import pandas as pd
 import numpy as np
 
-from config_map import map_table
+try:
+    from config_map import map_table
+except:
+    from ..config_map import map_table
 
 def format_datcom_input(file_path=None, text=None):
     # Adds initial space to namelist lines, if it doesn't exist.
