@@ -1,1 +1,1 @@
-from .esp import make_esp_input
+from .esp import make_esp_input, ConfigError
