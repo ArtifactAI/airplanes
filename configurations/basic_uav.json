@@ -64,5 +64,19 @@
         "half_widths": [0.15, 0.25, 0.25, 0.2, 0.1],
         "ellipse_ratios": [1, 1, 1.5, 1.5, 1],
         "axis_offsets": [0, 0, 0.1, 0.1, 0]
-    }
+    },
+    "ailerons": {
+        "differential_deflections": [-30, -20, -10, 0, 10, 20, 30],
+        "inboard_chord": 0.2,
+        "outboard_chord": 0.2,
+        "inboard_span_location": 1.8,
+        "outboard_span_location": 2.8
+    },
+    "elevator": {
+        "deflections": [-30, -20, -10, 0, 10, 20, 30],
+        "inboard_chord": 0.2,
+        "outboard_chord": 0.2,
+        "inboard_span_location": 0.18,
+        "outboard_span_location": 0.9
+    }   
 }

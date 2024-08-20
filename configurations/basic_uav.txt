@@ -4,5 +4,6 @@ This configuration describes a relatively simple and small airplane, such as a m
 	2.	Horizontal and Vertical Tail: The horizontal and vertical tails are similarly small, with simple geometries (no outboard panels), suggesting a straightforward control surface setup typical of small aircraft or UAVs.
 	3.	Fuselage: The fuselage is short, with a maximum length of 4.0 feet and a relatively slender profile, again consistent with a small-scale vehicle.
 	4.	Aerodynamic Profiles: The use of NACA 2412 and NACA 0012 airfoils indicates a basic and common choice for small aircraft, providing good lift characteristics at low speeds.
+	5.  Basic control surfaces. Ailerons and elevator.	
 
 This type of configuration is typical for small UAVs, model aircraft, or experimental prototype vehicles rather than a full-sized manned aircraft.
