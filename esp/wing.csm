@@ -1,0 +1,40 @@
+# Make Wing (or Canard, if present)
+UDPRIM $/wing_def
+SET vertical 0 # not a vertical surface
+SET inboard_semispan wing:inboard_semispan
+SET root_chord wing:root_chord
+SET airfoil wing:airfoil
+SET inboard_chord wing:inboard_chord
+SET inboard_sweep wing:inboard_sweep
+SET outboard_chord wing:outboard_chord
+SET outboard_sweep wing:outboard_sweep
+SET outboard_semispan wing:outboard_semispan
+SET sweep_ref_loc wing:sweep_ref_loc
+SET align_angle wing:align_angle
+SET inboard_dihedral wing:inboard_dihedral
+SET outboard_dihedral wing:outboard_dihedral
+MARK
+UDPRIM $/make_aero_surface
+TRANSLATE wing:x_apex 0 wing:z_apex
+
+IFTHEN wing:has_flaps EQ 1
+    SET x_apex wing:x_apex
+    SET inboard_surface_chord wing:inboard_flap_chord
+    SET outboard_surface_chord wing:outboard_flap_chord
+    SET inboard_surface_span_location wing:flap_inboard_span_location
+    SET outboard_surface_span_location wing:flap_outboard_span_location
+    UDPRIM $/make_control_surface
+    RESTORE . 0
+    MIRROR 0 -1 0 0
+ENDIF
+
+IFTHEN wing:has_ailerons EQ 1
+    SET x_apex wing:x_apex
+    SET inboard_surface_chord wing:inboard_aileron_chord
+    SET outboard_surface_chord wing:outboard_aileron_chord
+    SET inboard_surface_span_location wing:aileron_inboard_span_location
+    SET outboard_surface_span_location wing:aileron_outboard_span_location
+    UDPRIM $/make_control_surface
+    RESTORE . 0
+    MIRROR 0 -1 0 0
+ENDIF

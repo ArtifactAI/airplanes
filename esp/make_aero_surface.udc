@@ -1,0 +1,64 @@
+INTERFACE 	. all
+SET       	spanwise_breakpoint_pos sweep_ref_loc*(root_chord-inboard_chord)+inboard_semispan*tand(inboard_sweep)
+
+IFTHEN vertical NE 0
+   # variables specific to vertical surfaces (tail and fin)
+   SET align_angle 0
+   SET dihedral 0
+ENDIF
+
+# Outboard Wing Section
+IFTHEN    	outboard_chord   GT   0
+   SET       chord outboard_chord
+   SET       dx spanwise_breakpoint_pos+sweep_ref_loc*(inboard_chord-outboard_chord)+outboard_semispan*tand(outboard_sweep)
+   UDPARG    naca   series    airfoil
+   UDPRIM    naca   sharpte   1
+   ROTATEX   90   0   0
+   ROTATEY   -align_angle # so positive is trailing edge down
+   SCALE     chord   0   0   0
+   IFTHEN vertical NE 0
+      TRANSLATE dx   0  inboard_semispan+outboard_semispan
+   ELSE
+      TRANSLATE dx   (inboard_semispan+outboard_semispan)*cosd(outboard_dihedral)  (inboard_semispan+outboard_semispan)*sind(outboard_dihedral)
+   ENDIF
+ENDIF
+
+# Inboard Wing Section
+SET       chord inboard_chord
+SET       dx spanwise_breakpoint_pos
+UDPARG    naca   series   airfoil
+UDPRIM    naca   sharpte   1
+ROTATEX   90   0   0
+IFTHEN  vertical NE 0
+   ROTATEX 90 0 0
+ELSE
+   ROTATEY   -align_angle # so positive is trailing edge down
+ENDIF
+SCALE     chord   0   0   0
+IFTHEN vertical NE 0
+   TRANSLATE dx 0 inboard_semispan
+ELSE
+   # horizontal surface
+   TRANSLATE dx   	inboard_semispan*cosd(inboard_dihedral)  inboard_semispan*sind(inboard_dihedral)
+ENDIF
+
+# Root Wing Section
+SET       chord 	root_chord
+UDPARG    naca   series   airfoil
+UDPRIM    naca   sharpte   1
+ROTATEX   90   0   0
+IFTHEN vertical NE 0
+   ROTATEX 90 0 0
+ELSE
+   ROTATEY   -align_angle # so positive is trailing edge down
+ENDIF
+SCALE     chord   0   0   0
+RULE      0   0   0
+
+IFTHEN vertical EQ 0
+   RESTORE   .   0
+	MIRROR    0   -1   0   0
+   JOIN
+ENDIF
+
+END

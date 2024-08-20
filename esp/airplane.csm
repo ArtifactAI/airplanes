@@ -1,0 +1,69 @@
+# Make Wing (or Canard, if present)
+UDPRIM $/wing_def
+SET vertical 0 # not a vertical surface
+SET inboard_semispan wing:inboard_semispan
+SET root_chord wing:root_chord
+SET airfoil wing:airfoil
+SET inboard_chord wing:inboard_chord
+SET inboard_sweep wing:inboard_sweep
+SET outboard_chord wing:outboard_chord
+SET outboard_sweep wing:outboard_sweep
+SET outboard_semispan wing:outboard_semispan
+SET sweep_ref_loc wing:sweep_ref_loc
+SET align_angle wing:align_angle
+SET inboard_dihedral wing:inboard_dihedral
+SET outboard_dihedral wing:outboard_dihedral
+MARK
+UDPRIM $/make_aero_surface
+TRANSLATE wing:x_location 0 wing:z_location
+
+UDPARG  $$/flapz  xflap  "3.5; 2.5; 2.5; 2.8;"
+UDPARG  $$/flapz  yflap  "2.75; 2.75; 1.00; 1.00;"
+UDPARG  $$/flapz  theta  30.0
+UDPARG  $$/flapz  gap    0.0
+UDPARG $$/flapz openEnd 1
+UDPRIM  $$/flapz
+      
+
+# Make Horizontal Tail (or wing, if canard is present)
+UDPRIM $/horizontal_tail_def
+SET inboard_semispan htail:inboard_semispan
+SET root_chord htail:root_chord
+SET airfoil htail:airfoil
+SET inboard_chord htail:inboard_chord
+SET inboard_sweep htail:inboard_sweep
+SET outboard_chord htail:outboard_chord
+SET outboard_sweep htail:outboard_sweep
+SET outboard_semispan htail:outboard_semispan
+SET sweep_ref_loc htail:sweep_ref_loc
+SET align_angle htail:align_angle
+SET inboard_dihedral htail:inboard_dihedral
+SET outboard_dihedral htail:outboard_dihedral
+MARK
+UDPRIM $/make_aero_surface
+TRANSLATE htail:x_location 0 htail:z_location
+
+# Make Vertical Tail
+SET vertical 1
+UDPRIM $/vertical_tail_def
+
+SET inboard_semispan vtail:inboard_semispan
+SET root_chord vtail:root_chord
+SET airfoil vtail:airfoil
+SET inboard_chord vtail:inboard_chord
+SET inboard_sweep vtail:inboard_sweep
+SET outboard_chord vtail:outboard_chord
+SET outboard_sweep vtail:outboard_sweep
+SET outboard_semispan vtail:outboard_semispan
+SET sweep_ref_loc vtail:sweep_ref_loc
+
+MARK
+UDPRIM $/make_aero_surface
+TRANSLATE vtail:x_location 0 vtail:z_location
+   
+# Make Vertical Fin
+   
+# Make Body
+UDPRIM $/body_def
+MARK
+UDPRIM $/make_body

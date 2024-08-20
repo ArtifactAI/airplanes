@@ -1,0 +1,13 @@
+INTERFACE 	. all
+
+mark
+   point     0  0  0
+
+   patbeg    i  body:nstations
+
+    set height abs(body:half_widths[i]*body:ellipse_ratios[i])
+
+      udprim ellipse   ry  abs(body:half_widths[i])  rz  height
+      translate        body:x_stations[i]  0            body:axis_offsets[i]
+   patend
+blend

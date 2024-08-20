@@ -1,0 +1,22 @@
+INTERFACE . all
+# Wing Planform Characteristics
+DESPMTR   wing:x_location		1
+DESPMTR	  wing:z_location       0 # should be at apex (x/c station 0), i.e. if alignment is nonzero
+DESPMTR   wing:align_angle	    0
+DESPMTR   wing:root_chord 		3
+DESPMTR	  wing:sweep_ref_loc	0.25 # % of chord where sweep is measured from
+
+DESPMTR   wing:inboard_chord 		2
+DESPMTR	  wing:inboard_semispan  	2
+DESPMTR   wing:inboard_sweep	    45
+DESPMTR   wing:inboard_dihedral		10 # positive rotates upwards
+
+DESPMTR   wing:outboard_chord   	1.5
+DESPMTR   wing:outboard_semispan   	5
+DESPMTR   wing:outboard_sweep   	20 # degrees
+DESPMTR   wing:outboard_dihedral    10 # positive rotates upwards
+
+# Wing Section Characteristics
+DESPMTR   wing:airfoil  		2412
+
+END

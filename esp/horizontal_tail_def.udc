@@ -1,0 +1,22 @@
+INTERFACE . all
+
+# Horizontal Tail Planform Characteristics
+DESPMTR   htail:x_location		8
+DESPMTR	  htail:z_location       1 # should be at apex (x/c station 0), i.e. if alignment is nonzero
+DESPMTR   htail:align_angle	    -10
+DESPMTR   htail:root_chord 		2.5
+DESPMTR	  htail:sweep_ref_loc	0.25 # % of chord where sweep is measured from
+DESPMTR   htail:dihedral		0 # positive rotates upwards
+
+DESPMTR   htail:inboard_chord 		1.2
+DESPMTR	  htail:inboard_semispan  	2
+DESPMTR   htail:inboard_sweep	    10
+DESPMTR   htail:inboard_dihedral  0
+
+DESPMTR   htail:outboard_chord   	0
+DESPMTR   htail:outboard_semispan   	0
+DESPMTR   htail:outboard_sweep   	0 # degrees
+DESPMTR   htail:outboard_dihedral  0
+
+# Horizontal Tail Section Characteristics
+DESPMTR   htail:airfoil  		2412  

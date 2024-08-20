@@ -1,0 +1,59 @@
+INTERFACE . all
+
+SET y_inboard inboard_surface_span_location
+SET y_outboard outboard_surface_span_location
+
+# Place the control surface on the appropriate panel
+IFTHEN y_inboard GT inboard_semispan
+   # Place the control surface on the outboard panel
+   SET x_ref x_apex+spanwise_breakpoint_pos
+   SET chord_ref inboard_chord
+   SET panel_tip_chord outboard_chord
+   SET semispan_ref outboard_semispan
+   SET sweep_ref outboard_sweep
+ELSE
+   SET x_ref x_apex
+   SET chord_ref root_chord
+   SET panel_tip_chord inboard_chord
+   SET semispan_ref inboard_semispan
+   SET sweep_ref inboard_sweep
+ENDIF
+
+# Calculate the x and y coordinates of the control surface
+# Wing chord at the inboard location of the control surface:
+SET chord_y_inboard chord_ref-((chord_ref-panel_tip_chord)/semispan_ref)*y_inboard
+
+# Location of the leading edge of the wing at inboard location of the control surface:
+SET x_LE_inboard y_inboard*tand(sweep_ref)+sweep_ref_loc*(chord_ref-chord_y_inboard)
+
+# Location of the leading edge of the control surface:
+SET x_inboard x_ref+x_LE_inboard+chord_y_inboard-inboard_surface_chord
+
+SET chord_y_outboard chord_ref-((chord_ref-panel_tip_chord)/semispan_ref)*y_outboard
+SET x_LE_outboard y_outboard*tand(sweep_ref)+sweep_ref_loc*(chord_ref-chord_y_outboard)
+SET x_outboard x_ref+x_LE_outboard+chord_y_outboard-outboard_surface_chord
+
+SET x1 x_outboard+outboard_surface_chord # outboard aft
+SET x2 x_outboard # outboard forward
+SET x3 x_inboard # inboard forward
+SET x4 x_inboard+inboard_surface_chord # inboard aft
+
+SET y1 outboard_surface_span_location
+SET y2 outboard_surface_span_location
+SET y3 inboard_surface_span_location
+SET y4 inboard_surface_span_location
+
+DIMENSION x_flap 1 4
+DIMENSION y_flap 1 4
+
+SET x_flap "x1; x2; x3; x4;"
+SET y_flap "y1; y2; y3; y4;"
+
+UDPARG  $$/flapz  xflap  x_flap
+UDPARG  $$/flapz  yflap  y_flap
+UDPARG  $$/flapz  theta  5.0
+UDPARG  $$/flapz  gap    0.0
+UDPARG $$/flapz openEnd 1
+UDPRIM  $$/flapz
+
+END

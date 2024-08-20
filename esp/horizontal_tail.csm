@@ -1,0 +1,28 @@
+# Make Horizontal Tail (or wing, if canard is present)
+UDPRIM $/horizontal_tail_def
+SET inboard_semispan htail:inboard_semispan
+SET root_chord htail:root_chord
+SET airfoil htail:airfoil
+SET inboard_chord htail:inboard_chord
+SET inboard_sweep htail:inboard_sweep
+SET outboard_chord htail:outboard_chord
+SET outboard_sweep htail:outboard_sweep
+SET outboard_semispan htail:outboard_semispan
+SET sweep_ref_loc htail:sweep_ref_loc
+SET align_angle htail:align_angle
+SET inboard_dihedral htail:inboard_dihedral
+SET outboard_dihedral htail:outboard_dihedral
+MARK
+UDPRIM $/make_aero_surface
+TRANSLATE htail:x_apex 0 htail:z_apex
+
+IFTHEN htail:has_elevator EQ 1
+    SET x_apex htail:x_apex
+    SET inboard_surface_chord htail:inboard_elevator_chord
+    SET outboard_surface_chord htail:outboard_elevator_chord
+    SET inboard_surface_span_location htail:elevator_inboard_span_location
+    SET outboard_surface_span_location htail:elevator_outboard_span_location
+    UDPRIM $/make_control_surface
+    RESTORE . 0
+    MIRROR 0 -1 0 0
+ENDIF

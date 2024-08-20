@@ -1,0 +1,18 @@
+INTERFACE . all
+
+# Vertical Tail Planform Characteristics
+DESPMTR   vtail:x_location		5
+DESPMTR	  vtail:z_location      .1 # should be at apex (x/c station 0), i.e. if alignment is nonzero
+DESPMTR   vtail:root_chord 		4
+DESPMTR	  vtail:sweep_ref_loc	0.25 # % of chord where sweep is measured from
+
+DESPMTR   vtail:inboard_chord 		2
+DESPMTR	  vtail:inboard_semispan  	1
+DESPMTR   vtail:inboard_sweep	    60
+
+DESPMTR   vtail:outboard_chord   	1.5
+DESPMTR   vtail:outboard_semispan   2
+DESPMTR   vtail:outboard_sweep   	20 # degrees
+
+# Vertical Tail Section Characteristics
+DESPMTR   vtail:airfoil  		0012 
