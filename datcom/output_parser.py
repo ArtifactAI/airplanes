@@ -1,14 +1,7 @@
 import pandas as pd
 import re
 
-metadata_columns = {
-    'MACH': 0,
-    'ALTITUDE': 0,
-    'VELOCITY': 0,
-    'PRESSURE': 0,
-    'TEMPERATURE': 0,
-    'REYNOLDS': 0
-}
+reference_data = ['mach', 'altitude', 'velocity', 'pressure', 'temperature', 'reynolds', 'S_ref', 'c_ref', 'b_ref', 'x_ref', 'z_ref']
 
 main_table_columns = {
     'ALPHA': 9,
@@ -65,6 +58,36 @@ def get_table_type(tables):
 
     return tables, table_types
 
+def get_table_metadata(table):
+
+    lines = table.split('\n')
+    for index, line in enumerate(lines):
+        if 'FLIGHT CONDITIONS' in line:
+            break
+    
+    units_line = lines[index + 3]
+    units = re.split(r'\s{2,}', units_line) # magically, this should capture the blank space that is the Mach number unit
+
+    numbers_line = lines[index + 4]
+    numbers_line = numbers_line.lstrip('0').strip()
+    numbers = re.split(r'\s{2,}', numbers_line)
+
+    metadata = {}
+    for i, key in enumerate(reference_data):
+        if i < len(units) and i < len(numbers):
+            metadata[key] = {
+                'value': numbers[i].strip(),
+                'unit': units[i].strip()
+            }
+        else:
+            metadata[key] = {
+                'value': None,
+                'unit': None
+            }
+
+    return metadata
+
+
 def parse_main_table(table_content):
     lines = table_content.split('\n')
     data = []
@@ -96,8 +119,18 @@ def parse_main_table(table_content):
     for col in df.columns:
         df[col] = pd.to_numeric(df[col])
 
-    return df
+    # Remove rows where all values are NaN
+    df = df.dropna(how='all')
 
+    # Check if CYB and CNB columns have a value in the first row but NaN after
+    # Datcom will only populate the first row if CYB and CNB are indepedent of alpha
+    for col in ['CYB', 'CNB']:
+        if col in df.columns:
+            first_value = df[col].iloc[0]
+            if pd.notna(first_value) and df[col].iloc[1:].isna().all():
+                df[col] = first_value
+
+    return df
 
 def parse_datcom_output(file_path):
     with open(file_path, 'r') as file:
@@ -123,3 +156,12 @@ if __name__ == "__main__":
         file_content = file.read()
     tables = extract_tables(file_content)
     tables, table_types = get_table_type(tables)
+
+    dataframes = []
+    metadata = []
+
+    for table, table_type in zip(tables, table_types):
+        if table_type == 'main':
+            df = parse_main_table(table)
+            dataframes.append(df)
+            metadata.append(get_table_metadata(table))
