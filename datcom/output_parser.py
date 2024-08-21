@@ -18,6 +18,38 @@ main_table_columns = {
     'CLB': 13
 }
 
+damping_table_columns = {
+    'ALPHA': 9,
+    'CLQ': 13,
+    'CMQ': 13,
+    'CLAD': 13,
+    'CMAD': 13,
+    'CLP': 13,
+    'CYP': 13,
+    'CNP': 13,
+    'CNR': 13,
+    'CLR': 13
+}
+
+symmetric_control_surface_columns = {
+    'DELTA': 9,
+    'CYB': 13,
+    'CNB': 13,
+    'CLB': 13
+}
+
+table type
+starting regex
+data_start_regex
+column headers and widths dict
+
+table_types = {
+    'main': {
+        'starting_regex': re.compile(r'1\s+AUTOMATED STABILITY AND CONTROL METHODS'),
+        'column_headers_and_widths': main_table_columns
+    }
+}
+
 def extract_tables(file_content):
     table_pattern = re.compile(r'1\s+AUTOMATED STABILITY AND CONTROL METHODS')
     end_pattern = re.compile(r'^1', re.MULTILINE)
@@ -43,16 +75,20 @@ def get_table_type(tables):
 
     for table in tables:
         lines = table.split('\n')
-        columns = []
 
-        for line in lines:
-            # find column header names. Column headers start with 0... ALPHA or 0... DELTA
-            if re.match(r'^\s*0\s*ALPHA', line) or re.match(r'^\s*0\s*DELTA', line):
-                columns = re.split(r'\s{2,}', re.sub(r'^\s*0\s*', '', line.strip()))
-                break
-
-        if set(list(main_table_columns.keys())) == set(columns):
+        if 'CHARACTERISTICS AT ANGLE OF ATTACK AND IN SIDESLIP' in lines[1]:
             table_types.append('main')
+        elif 'DYNAMIC DERIVATIVES' in lines[1]:
+            table_types.append('aero_damping')
+        elif 'CHARACTERISTICS OF HIGH LIFT AND CONTROL DEVICES' in lines[1]:
+            # determine if this table is for a symmetric or asymmetric control surface
+            for line in lines:
+                if re.match(r'^0\s+DELTA\s+', line):
+                    table_types.append('symmetric_control_surface')
+                    break
+                elif re.match(r'^0\(DELTAL-DELTAR\)', line):
+                    table_types.append('asymmetric_control_surface')
+                    break
         else:
             table_types.append('unknown')
 
@@ -88,26 +124,33 @@ def get_table_metadata(table):
     return metadata
 
 
-def parse_main_table(table_content):
+def parse_table(table_content, table_type):
     lines = table_content.split('\n')
     data = []
-    column_names = list(main_table_columns.keys())
     start_index = None
+
+    if table_type == 'main':
+        column_reference = main_table_columns
+    elif table_type == 'damping':
+        column_reference = damping_table_columns
+        
+    column_names = list(column_reference.keys())
 
     # Find the line where the data starts
     for i, line in enumerate(lines):
-        if line.startswith('0 ALPHA'):
+        if re.match(r'^0\s+ALPHA', line):
             start_index = i + 2
             break
 
     if start_index is not None:
         for line in lines[start_index:]:
             if line.startswith('0'):
-                # End of the table has been reached
+                # End of the table has been reached 
+                # TODO: include downwash data, which may be present after this line
                 break
             row = []
             start = 1  # Start after the first space
-            for col, width in main_table_columns.items():
+            for col, width in column_reference.items():
                 value = line[start:start+width].strip()
                 row.append(value)
                 start += width
@@ -122,15 +165,64 @@ def parse_main_table(table_content):
     # Remove rows where all values are NaN
     df = df.dropna(how='all')
 
+    # Drop columns where the header is CLAD or CMAD
+    # TODO: consider adding these damping derivatives back in; for most models, they don't exist
+    df = df.drop(columns=['CLAD', 'CMAD'], errors='ignore')
+
     # Check if CYB and CNB columns have a value in the first row but NaN after
     # Datcom will only populate the first row if CYB and CNB are indepedent of alpha
-    for col in ['CYB', 'CNB']:
+    # TODO: check if this is also true for CLQ and CMQ
+    for col in ['CYB', 'CNB', 'CLQ', 'CMQ']:
         if col in df.columns:
             first_value = df[col].iloc[0]
             if pd.notna(first_value) and df[col].iloc[1:].isna().all():
                 df[col] = first_value
 
     return df
+
+def parse_control_surfaces(table_content):
+    lines = table_content.split('\n')
+    data = []
+    start_index = None
+
+    column_names = ['DELTA', 'D_CL', 'D_CM', 'D_CL_max', 'D_CD_min']
+
+    # Find the line where the data starts
+    for i, line in enumerate(lines):
+        if re.match(r'^0\s+DELTA', line):
+            start_index = i + 3
+            break
+    
+    if start_index is not None:
+        for line in lines[start_index:]:
+            if line.startswith('0'):
+                # End of the table has been reached 
+                break
+            values = re.findall(r'\S+', line)
+            values = values[:5] # TODO: add in (CLA)D, (CH)A, and (CH)D
+            data.append(values)
+
+        df = pd.DataFrame(data, columns=column_names) 
+
+    next... get the second half of the table, with induced drag coefficient
+
+
+    values = re.findall(r'\S+', line)
+    # Find the line where the data starts
+    for i, line in enumerate(lines):
+        if table_type == 'symmetric_control_surface':
+            if re.match(r'^0\s+DELTA\s+', line):
+                start_index = i + 2
+                break
+        elif table_type == 'asymmetric_control_surface':
+            if re.match(r'^0\s+ALPHA\s+', line):
+                start_index = i + 2
+                break
+
+
+    for col in df.columns:
+        df[col] = pd.to_numeric(df[col])
+
 
 def parse_datcom_output(file_path):
     with open(file_path, 'r') as file:
@@ -161,7 +253,14 @@ if __name__ == "__main__":
     metadata = []
 
     for table, table_type in zip(tables, table_types):
+        metadata.append(get_table_metadata(table))
         if table_type == 'main':
-            df = parse_main_table(table)
+            df = parse_table(table, table_type)
             dataframes.append(df)
-            metadata.append(get_table_metadata(table))
+        elif table_type == 'aero_damping':
+            df = parse_table(table, table_type)
+            dataframes.append(df)
+        else:
+            dataframes.append(None)
+
+# TODO: get the last main table. In the future, coordinate it with the input file buildup, but it should be the last.
