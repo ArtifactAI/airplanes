@@ -7,6 +7,7 @@ The library currently supports aircraft configurations with the following charac
 
 - Single wing
 - Horizontal tail alone, or horizontal and vertical tails
+- NACA 4-series airfoil sections
 - Fuselage with circular and elliptical cross-sections that begin at a single point
 - Combinations of the the above
 - Wing flaps and ailerons
@@ -19,6 +20,8 @@ The library currently supports aircraft configurations with the following charac
 ## Future Configurations
 Datcom supports a much wider variety of configurations, which will be added to this library. We plan to expand support for the following configurations:
 
+- [ ] Additional airfoil section characteristics
+- [ ] Aerodynamic damping
 - [ ] All-moving horizontal tail
 - [ ] Canard
 - [ ] Twin vertical tail (though Datcom does not support V-tails)
