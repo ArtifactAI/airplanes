@@ -31,24 +31,6 @@ damping_table_columns = {
     'CLR': 13
 }
 
-symmetric_control_surface_columns = {
-    'DELTA': 9,
-    'CYB': 13,
-    'CNB': 13,
-    'CLB': 13
-}
-
-table type
-starting regex
-data_start_regex
-column headers and widths dict
-
-table_types = {
-    'main': {
-        'starting_regex': re.compile(r'1\s+AUTOMATED STABILITY AND CONTROL METHODS'),
-        'column_headers_and_widths': main_table_columns
-    }
-}
 
 def extract_tables(file_content):
     table_pattern = re.compile(r'1\s+AUTOMATED STABILITY AND CONTROL METHODS')
@@ -131,7 +113,7 @@ def parse_table(table_content, table_type):
 
     if table_type == 'main':
         column_reference = main_table_columns
-    elif table_type == 'damping':
+    elif table_type == 'aero_damping':
         column_reference = damping_table_columns
         
     column_names = list(column_reference.keys())
@@ -202,26 +184,37 @@ def parse_control_surfaces(table_content):
             values = values[:5] # TODO: add in (CLA)D, (CH)A, and (CH)D
             data.append(values)
 
-        df = pd.DataFrame(data, columns=column_names) 
+        increments_table_df = pd.DataFrame(data, columns=column_names) 
 
-    next... get the second half of the table, with induced drag coefficient
-
-
-    values = re.findall(r'\S+', line)
-    # Find the line where the data starts
+    # Get the second table included in this section
+    data = []
+    start_index = None
     for i, line in enumerate(lines):
-        if table_type == 'symmetric_control_surface':
-            if re.match(r'^0\s+DELTA\s+', line):
-                start_index = i + 2
-                break
-        elif table_type == 'asymmetric_control_surface':
-            if re.match(r'^0\s+ALPHA\s+', line):
-                start_index = i + 2
-                break
+        if re.match(r'^\s+ALPHA', line):
+            start_index = i + 2
+            break
 
+    match = re.match(r'^0\s+DELTA\s*=\s*', lines[start_index - 3])
+    remaining_string = lines[start_index - 3][match.end():].strip()
+    column_names = ['ALPHA'] + remaining_string.split()
 
-    for col in df.columns:
-        df[col] = pd.to_numeric(df[col])
+    if start_index is not None:
+        for line in lines[start_index:]:
+            if line.startswith('0'):
+                # End of the table has been reached 
+                break
+            values = re.findall(r'\S+', line)
+            data.append(values)
+
+        induced_drag_table_df = pd.DataFrame(data, columns=column_names)
+
+    for col in increments_table_df.columns:
+        increments_table_df[col] = pd.to_numeric(increments_table_df[col])
+
+    for col in induced_drag_table_df.columns:
+        induced_drag_table_df[col] = pd.to_numeric(induced_drag_table_df[col])
+
+    return increments_table_df, induced_drag_table_df
 
 
 def parse_datcom_output(file_path):
@@ -253,13 +246,20 @@ if __name__ == "__main__":
     metadata = []
 
     for table, table_type in zip(tables, table_types):
-        metadata.append(get_table_metadata(table))
+        
         if table_type == 'main':
             df = parse_table(table, table_type)
             dataframes.append(df)
+            metadata.append(get_table_metadata(table))
         elif table_type == 'aero_damping':
             df = parse_table(table, table_type)
             dataframes.append(df)
+            metadata.append(get_table_metadata(table))
+        elif table_type == 'symmetric_control_surface':
+            df_increments, df_induced_drag = parse_control_surfaces(table)
+            dataframes.append(df_increments)
+            dataframes.append(df_induced_drag)
+            metadata.append(get_table_metadata(table))
         else:
             dataframes.append(None)
 
