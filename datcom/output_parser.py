@@ -162,7 +162,7 @@ def parse_table(table_content, table_type):
 
     return df
 
-def parse_control_surfaces(table_content):
+def parse_symmetric_control_surfaces(table_content):
     lines = table_content.split('\n')
     data = []
     start_index = None
@@ -216,6 +216,59 @@ def parse_control_surfaces(table_content):
 
     return increments_table_df, induced_drag_table_df
 
+def parse_asymmetric_control_surfaces(table_content):
+    lines = table_content.split('\n')
+    data = []
+    start_index = None
+
+    column_names = ['D_AILERON', 'D_C_ROLL']
+
+    # Find the line where the data starts
+    for i, line in enumerate(lines):
+        if re.match(r'^0\s+DELTAL', line):
+            start_index = i + 2
+            break
+    
+    if start_index is not None:
+        for line in lines[start_index:]:
+            if line.startswith('0') or line.startswith(' Return to main program'):
+                # End of the table has been reached 
+                break
+            values = re.findall(r'\S+', line)
+            data.append([values[0], values[2]])
+
+        roll_coefficient_table_df = pd.DataFrame(data, columns=column_names) 
+
+    # Get the second table included in this section
+    data = []
+    start_index = None
+    for i, line in enumerate(lines):
+        if re.match(r'^0\(DELTAL-DELTAR\)', line):
+            start_index = i + 3
+            break
+
+    match = re.match(r'^0\s*\(DELTAL-DELTAR\)\s*=', lines[i])
+    remaining_string = lines[i][match.end():].strip()
+    column_names = ['ALPHA'] + remaining_string.split()
+
+    if start_index is not None:
+        for line in lines[start_index:]:
+            if line.startswith('0'):
+                # End of the table has been reached 
+                break
+            values = re.findall(r'\S+', line)
+            data.append(values)
+
+        CN_aileron_table_df = pd.DataFrame(data, columns=column_names)
+
+    for col in roll_coefficient_table_df.columns:
+        roll_coefficient_table_df[col] = pd.to_numeric(roll_coefficient_table_df[col])
+
+    for col in CN_aileron_table_df.columns:
+        CN_aileron_table_df[col] = pd.to_numeric(CN_aileron_table_df[col])
+
+    return roll_coefficient_table_df, CN_aileron_table_df
+
 
 def parse_datcom_output(file_path):
     with open(file_path, 'r') as file:
@@ -256,9 +309,14 @@ if __name__ == "__main__":
             dataframes.append(df)
             metadata.append(get_table_metadata(table))
         elif table_type == 'symmetric_control_surface':
-            df_increments, df_induced_drag = parse_control_surfaces(table)
+            df_increments, df_induced_drag = parse_symmetric_control_surfaces(table)
             dataframes.append(df_increments)
             dataframes.append(df_induced_drag)
+            metadata.append(get_table_metadata(table))
+        elif table_type == 'asymmetric_control_surface':
+            df_roll_coefficient, df_CN_aileron = parse_asymmetric_control_surfaces(table)
+            dataframes.append(df_roll_coefficient)
+            dataframes.append(df_CN_aileron)
             metadata.append(get_table_metadata(table))
         else:
             dataframes.append(None)
