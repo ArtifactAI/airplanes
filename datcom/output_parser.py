@@ -284,26 +284,23 @@ def parse_datcom_output(file_path):
     for table, table_type in zip(tables, table_types):
         
         if table_type == 'rigid_body_static':
-            # Note that this variable will get overwritten if there are multiple rigid body static tables. 
+            # TODO:
+            # Note that variable datcom_data['reference_data'] and datcom_data['rigid_body_static'] will get overwritten if there are multiple rigid body static tables.
             # That is on purpose - we assume that the last one will have the complete vehicle buildup.
+            # We also assume that only one flight condition and configuration will be used.
             rigid_body_static_df = parse_table(table, table_type)
-            rigid_body_static_df.attrs['reference_data'] = get_table_metadata(table)
+            reference_data = get_table_metadata(table)
             datcom_data['rigid_body_static'] = rigid_body_static_df
+            datcom_data['reference_data'] = reference_data
         elif table_type == 'rigid_body_dynamic':
             rigid_body_dynamic_df = parse_table(table, table_type)
-            rigid_body_dynamic_df.attrs['reference_data'] = get_table_metadata(table)
             datcom_data['rigid_body_dynamic'] = rigid_body_dynamic_df
         elif table_type == 'symmetric_control_surface':
-            reference_data = get_table_metadata(table)
             coef_increments_df, induced_drag_df = parse_symmetric_control_surfaces(table)
-            coef_increments_df.attrs['reference_data'] = reference_data
-            induced_drag_df.attrs['reference_data'] = reference_data
             symmetric_control_surfaces.append((coef_increments_df, induced_drag_df))
         elif table_type == 'asymmetric_control_surface':
             reference_data = get_table_metadata(table)
             roll_coef_df, yaw_coef_df = parse_asymmetric_control_surfaces(table)
-            roll_coef_df.attrs['reference_data'] = reference_data
-            yaw_coef_df.attrs['reference_data'] = reference_data
             datcom_data['ailerons'] = {
                 'roll_coefficient': roll_coef_df,
                 'yaw_coefficient': yaw_coef_df

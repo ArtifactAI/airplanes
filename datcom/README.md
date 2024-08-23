@@ -41,6 +41,8 @@ Datcom supports a much wider variety of configurations, which will be added to t
 ## Output Parsing Assumptions
 The output parser assumes that the datcom input file is built up such that the final case has all lifting surfaces (any or all of wing, horizontal tail, vertical tail, and vertical fin). Prior configurations are thrown out. Control surfaces can be added to the datcom input file in any order for accurate output parsing, though the order is enforced in the input file buildup function.
 
+Currently angles and derivatives are in degrees or 1/degrees. Consider changing everything to radians.
+
 ## Upcoming Features
 - Unit testing
 - Improved documentation and user guides
