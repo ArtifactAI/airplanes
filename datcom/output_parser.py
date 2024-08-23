@@ -59,9 +59,9 @@ def get_table_type(tables):
         lines = table.split('\n')
 
         if 'CHARACTERISTICS AT ANGLE OF ATTACK AND IN SIDESLIP' in lines[1]:
-            table_types.append('main')
+            table_types.append('rigid_body_static')
         elif 'DYNAMIC DERIVATIVES' in lines[1]:
-            table_types.append('aero_damping')
+            table_types.append('rigid_body_dynamic')
         elif 'CHARACTERISTICS OF HIGH LIFT AND CONTROL DEVICES' in lines[1]:
             # determine if this table is for a symmetric or asymmetric control surface
             for line in lines:
@@ -111,9 +111,9 @@ def parse_table(table_content, table_type):
     data = []
     start_index = None
 
-    if table_type == 'main':
+    if table_type == 'rigid_body_static':
         column_reference = main_table_columns
-    elif table_type == 'aero_damping':
+    elif table_type == 'rigid_body_dynamic':
         column_reference = damping_table_columns
         
     column_names = list(column_reference.keys())
@@ -271,54 +271,66 @@ def parse_asymmetric_control_surfaces(table_content):
 
 
 def parse_datcom_output(file_path):
-    with open(file_path, 'r') as file:
-        file_content = file.read()
-    
-    tables = extract_tables(file_content)
-    tables, table_types = get_table_type(tables)
-
-    dataframes = []
-
-    for table, table_type in zip(tables, table_types):
-        if table_type == 'main':
-            df = parse_main_table(table)
-            dataframes.append(df)
-
-    return dataframes
-
-if __name__ == "__main__":
-    # tables = parse_datcom_output('datcom.out')
-    file_path = 'datcom.out'
 
     with open(file_path, 'r') as file:
         file_content = file.read()
     tables = extract_tables(file_content)
     tables, table_types = get_table_type(tables)
 
-    dataframes = []
-    metadata = []
+    datcom_data = {}
+
+    symmetric_control_surfaces = []
 
     for table, table_type in zip(tables, table_types):
         
-        if table_type == 'main':
-            df = parse_table(table, table_type)
-            dataframes.append(df)
-            metadata.append(get_table_metadata(table))
-        elif table_type == 'aero_damping':
-            df = parse_table(table, table_type)
-            dataframes.append(df)
-            metadata.append(get_table_metadata(table))
+        if table_type == 'rigid_body_static':
+            # Note that this variable will get overwritten if there are multiple rigid body static tables. 
+            # That is on purpose - we assume that the last one will have the complete vehicle buildup.
+            rigid_body_static_df = parse_table(table, table_type)
+            rigid_body_static_df.attrs['reference_data'] = get_table_metadata(table)
+            datcom_data['rigid_body_static'] = rigid_body_static_df
+        elif table_type == 'rigid_body_dynamic':
+            rigid_body_dynamic_df = parse_table(table, table_type)
+            rigid_body_dynamic_df.attrs['reference_data'] = get_table_metadata(table)
+            datcom_data['rigid_body_dynamic'] = rigid_body_dynamic_df
         elif table_type == 'symmetric_control_surface':
-            df_increments, df_induced_drag = parse_symmetric_control_surfaces(table)
-            dataframes.append(df_increments)
-            dataframes.append(df_induced_drag)
-            metadata.append(get_table_metadata(table))
+            reference_data = get_table_metadata(table)
+            coef_increments_df, induced_drag_df = parse_symmetric_control_surfaces(table)
+            coef_increments_df.attrs['reference_data'] = reference_data
+            induced_drag_df.attrs['reference_data'] = reference_data
+            symmetric_control_surfaces.append((coef_increments_df, induced_drag_df))
         elif table_type == 'asymmetric_control_surface':
-            df_roll_coefficient, df_CN_aileron = parse_asymmetric_control_surfaces(table)
-            dataframes.append(df_roll_coefficient)
-            dataframes.append(df_CN_aileron)
-            metadata.append(get_table_metadata(table))
-        else:
-            dataframes.append(None)
+            reference_data = get_table_metadata(table)
+            roll_coef_df, yaw_coef_df = parse_asymmetric_control_surfaces(table)
+            roll_coef_df.attrs['reference_data'] = reference_data
+            yaw_coef_df.attrs['reference_data'] = reference_data
+            datcom_data['ailerons'] = {
+                'roll_coefficient': roll_coef_df,
+                'yaw_coefficient': yaw_coef_df
+            }
 
-# TODO: get the last main table. In the future, coordinate it with the input file buildup, but it should be the last.
+    if len(symmetric_control_surfaces) == 2:
+        flaps_df = symmetric_control_surfaces[0]
+        elevator_df = symmetric_control_surfaces[1]
+        datcom_data['flaps'] = {
+            'coef_increments': flaps_df[0],
+            'induced_drag_increments': flaps_df[1]
+        }
+        datcom_data['elevator'] = {
+            'coef_increments': elevator_df[0],
+            'induced_drag_increments': elevator_df[1]
+        }
+    elif len(symmetric_control_surfaces) == 1:
+        # TODO: consider the case when a flap is used but no elevator
+        # Currently, if there is one symmetric control surface, it is assumed to be an elevator
+        elevator_df = symmetric_control_surfaces[0]
+        datcom_data['elevator'] = {
+            'coef_increments': elevator_df[0],
+            'induced_drag_increments': elevator_df[1]
+        }
+
+        return datcom_data
+    
+if __name__ == '__main__':
+    datcom_data = parse_datcom_output('./datcom/datcom.out')
+    print(datcom_data)

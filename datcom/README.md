@@ -38,6 +38,9 @@ Datcom supports a much wider variety of configurations, which will be added to t
 3. **Educational Tool**: Serve as a learning platform for students and enthusiasts to understand aircraft design principles and aerodynamics.
 4. **Control Design and Simulation**: Generate the necessary aerodynamic data for control system design, physics simulation, and software-in-the-loop testing.
 
+## Output Parsing Assumptions
+The output parser assumes that the datcom input file is built up such that the final case has all lifting surfaces (any or all of wing, horizontal tail, vertical tail, and vertical fin). Prior configurations are thrown out. Control surfaces can be added to the datcom input file in any order for accurate output parsing, though the order is enforced in the input file buildup function.
+
 ## Upcoming Features
 - Unit testing
 - Improved documentation and user guides
