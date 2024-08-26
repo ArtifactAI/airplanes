@@ -15,6 +15,7 @@ The library currently supports aircraft configurations with the following charac
 - All control surfaces are of 'plain' type
 
 ## Usage
+The file `generate_input.py` is a script that generates the input file for the datcom executable. It takes a JSON configuration file as input and outputs the input file. `parse_output.py` is a script that parses the output file into Pandas dataframes. `aero_model.py` contains the functions for calculating the aerodynamic coefficients, and `aero_plots.py` contains the functions for plotting the data.
 
 
 ## Future Configurations

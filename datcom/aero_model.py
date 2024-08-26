@@ -1,6 +1,6 @@
 import numpy as np
 from typing import List
-from datcom.output_parser import parse_datcom_output
+from datcom.parse_output import parse_datcom_output
 
 import pandas as pd
 from scipy.interpolate import RegularGridInterpolator

@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-# from aero_model import *
 
 from datcom.aero_model import *
 
