@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from aero_model import *
+# from aero_model import *
+
+from datcom.aero_model import *
 
 def pitch_plane_dataset(coefficients):
     CF_wind = []
@@ -59,6 +61,7 @@ def plot_pitch_plane(datasets, labels):
         # plt.title('Drag Polar')
         # plt.legend()
         # plt.grid(True)
+    plt.show()
 
 
 # Plot CL versus alpha
@@ -73,6 +76,3 @@ coefficients = [aero_coefficients(np.radians(alpha)) for alpha in alpha_range]
 coefficients_elevator = [aero_coefficients(np.radians(alpha), surfaces=surfaces) for alpha in alpha_range]
 
 plot_pitch_plane([coefficients, coefficients_elevator], ['All surfaces zero', 'Elevator 10 deg'])
-
-plt.show()
-

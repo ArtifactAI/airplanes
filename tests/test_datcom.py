@@ -1,9 +1,12 @@
 import unittest
 import json
 import pandas as pd
+import numpy as np
 
 from datcom import make_datcom_input
 from datcom import parse_datcom_output
+from datcom.aero_plots import pitch_plane_dataset, plot_pitch_plane
+from datcom import aero_coefficients
 
 class TestDatcom(unittest.TestCase):
     def test_make_datcom_input(self):
@@ -43,6 +46,31 @@ class TestDatcomOutputParser(unittest.TestCase):
 
         self.assertIsInstance(datcom_output, dict)
 
+# class TestAeroPlots(unittest.TestCase):
+#     def setUp(self):
+#         # Sample data for testing
+#         self.alpha_range = [0, 5]
+#         self.coefficients = [aero_coefficients(np.radians(alpha)) for alpha in self.alpha_range]
+
+#     def test_pitch_plane_dataset(self):
+#         drag, lift, pitching = pitch_plane_dataset(self.coefficients)
+        
+#         # Check lengths
+#         self.assertEqual(len(drag), len(self.coefficients))
+#         self.assertEqual(len(lift), len(self.coefficients))
+#         self.assertEqual(len(pitching), len(self.coefficients))
+        
+#         # Check values
+#         self.assertAlmostEqual(drag[0], -0.1)
+#         self.assertAlmostEqual(lift[0], -0.2)
+#         self.assertAlmostEqual(pitching[0], 0.01)
+
+#     def test_plot_pitch_plane(self):
+#         # This test ensures that the plotting function runs without errors
+#         try:
+#             plot_pitch_plane([self.coefficients], ['Test Label'])
+#         except Exception as e:
+#             self.fail(f"plot_pitch_plane raised an exception: {e}")
 
 if __name__ == '__main__':
     unittest.main()

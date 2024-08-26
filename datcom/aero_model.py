@@ -1,6 +1,6 @@
 import numpy as np
 from typing import List
-from output_parser import parse_datcom_output
+from datcom.output_parser import parse_datcom_output
 
 import pandas as pd
 from scipy.interpolate import RegularGridInterpolator
@@ -163,7 +163,7 @@ def symmetric_control_surface_coefficients(surface_name, alpha, beta, deflection
     if coef_increments is not None:
         D_CL, D_CM, D_CL_max, D_CD_min = coef_increments([deflection])[0]
         D_CDI = induced_drag((alpha, deflection))
-        
+
         CF = R_wind2bod(np.radians(alpha), np.radians(beta)) @ np.array([-D_CDI, 0, -D_CL])
         CM = np.array([0, D_CM, 0])
     else:
