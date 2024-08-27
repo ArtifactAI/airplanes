@@ -1,8 +1,7 @@
 import numpy as np
 from typing import List
-from datcom.parse_output import parse_datcom_output
-
-import pandas as pd
+import pickle
+import os
 from scipy.interpolate import RegularGridInterpolator
 
 def R_wind2bod(alpha, beta=0):
@@ -21,26 +20,37 @@ def R_wind2bod(alpha, beta=0):
 
     return R2_alpha @ R3_negBeta
 
-data = parse_datcom_output('datcom/datcom.out')
+current_file_path = os.path.abspath(__file__)
+current_directory = os.path.dirname(current_file_path)
+with open(os.path.join(current_directory, '.artifact', 'aero_db.pkl'), 'rb') as file:
+    aero_db = pickle.load(file)
 
-s_ref = data['reference_data']['S_ref']['value']
-b_ref = data['reference_data']['b_ref']['value']
-c_ref = data['reference_data']['c_ref']['value']  
+S_ref = aero_db['reference_data']['S_ref']['value']
+b_ref = aero_db['reference_data']['b_ref']['value']
+c_ref = aero_db['reference_data']['c_ref']['value']  
 
 # Moment reference
-x_ref = data['reference_data']['x_ref']['value']
-z_ref = data['reference_data']['z_ref']['value']
+x_ref = aero_db['reference_data']['x_ref']['value']
+z_ref = aero_db['reference_data']['z_ref']['value']
 r_ref = [x_ref, 0, z_ref]
 
+configuration_data = {
+    'S_ref': S_ref,
+    'b_ref': b_ref,
+    'c_ref': c_ref,
+    'x_ref': aero_db['reference_data']['x_ref']['value'],
+    'z_ref': aero_db['reference_data']['z_ref']['value'],
+    'r_ref': r_ref,
+}
 
-rigid_body_static = data['rigid_body_static']
+rigid_body_static = aero_db['rigid_body_static']
 alpha_values = rigid_body_static['ALPHA'].values
 dependent_vars = rigid_body_static.iloc[:, 1:].values
 rigid_body_static_interpolator = RegularGridInterpolator(
     (alpha_values,), dependent_vars, bounds_error=False, fill_value=None
 )
 
-rigid_body_dynamic = data['rigid_body_dynamic']
+rigid_body_dynamic = aero_db['rigid_body_dynamic']
 alpha_values = rigid_body_dynamic['ALPHA'].values
 dependent_vars = rigid_body_dynamic.iloc[:, 1:].values
 rigid_body_dynamic_interpolator = RegularGridInterpolator(
@@ -53,17 +63,17 @@ control_surfaces = []
 # Create interpolator for flaps if present in the data
 flap_coef_increments_interpolator = None
 flap_induced_drag_interpolator = None
-if 'flaps' in data:
+if 'flaps' in aero_db:
     control_surfaces.append('flaps')
 
-    flap_coef_increments = data['flaps']['coef_increments']
+    flap_coef_increments = aero_db['flaps']['coef_increments']
     delta_values = flap_coef_increments['DELTA'].values
     dependent_vars = flap_coef_increments.iloc[:, 1:].values
     flap_coef_increments_interpolator = RegularGridInterpolator(
         (delta_values,), dependent_vars, bounds_error=False, fill_value=None
     )
 
-    flap_induced_drag = data['flaps']['induced_drag_increments']
+    flap_induced_drag = aero_db['flaps']['induced_drag_increments']
     alpha_values = flap_induced_drag.iloc[:, 0].tolist()
     delta_values = flap_induced_drag.columns.tolist()[1:]
     flap_induced_drag_interpolator = RegularGridInterpolator((alpha_values, delta_values), flap_induced_drag.values[:, 1:])
@@ -71,17 +81,17 @@ if 'flaps' in data:
 # Create interpolator for elevator if present in the data
 elevator_coef_increments_interpolator = None
 elevator_induced_drag_interpolator = None
-if 'elevator' in data:
+if 'elevator' in aero_db:
     control_surfaces.append('elevator')
 
-    elevator_coef_increments = data['elevator']['coef_increments']
+    elevator_coef_increments = aero_db['elevator']['coef_increments']
     delta_values = elevator_coef_increments['DELTA'].values
     dependent_vars = elevator_coef_increments.iloc[:, 1:].values
     elevator_coef_increments_interpolator = RegularGridInterpolator(
         (delta_values,), dependent_vars, bounds_error=False, fill_value=None
     )
 
-    elevator_induced_drag = data['elevator']['induced_drag_increments']
+    elevator_induced_drag = aero_db['elevator']['induced_drag_increments']
     alpha_values = elevator_induced_drag.iloc[:, 0].tolist()
     delta_values = elevator_induced_drag.columns.tolist()[1:]
     elevator_induced_drag_interpolator = RegularGridInterpolator((alpha_values, delta_values), elevator_induced_drag.values[:, 1:])
@@ -89,17 +99,17 @@ if 'elevator' in data:
 # Create interpolator for ailerons if present in the data
 aileron_roll_coef_interpolator = None
 aileron_yaw_coef_interpolator = None
-if 'ailerons' in data:
+if 'ailerons' in aero_db:
     control_surfaces.append('ailerons')
 
-    aileron_roll_coef = data['ailerons']['roll_coefficient']
+    aileron_roll_coef = aero_db['ailerons']['roll_coefficient']
     delta_values = aileron_roll_coef['D_AILERON'].values
     dependent_vars = aileron_roll_coef.iloc[:, 1:].values.flatten()
     aileron_roll_coef_interpolator = RegularGridInterpolator(
         (delta_values,), dependent_vars, bounds_error=False, fill_value=None
     )
 
-    aileron_yaw_coef = data['ailerons']['yaw_coefficient']
+    aileron_yaw_coef = aero_db['ailerons']['yaw_coefficient']
     alpha_values = aileron_yaw_coef.iloc[:, 0].tolist()
     delta_values = aileron_yaw_coef.columns.tolist()[1:]
     aileron_yaw_coef_interpolator = RegularGridInterpolator((alpha_values, delta_values), aileron_yaw_coef.values[:, 1:])
@@ -186,9 +196,7 @@ def asymmetric_control_surface_coefficients(alpha, deflection):
     
     return CF, CM
 
-def aero_coefficients(alpha, beta=0, surfaces: dict = {}, p=0, q=0, r=0):
-
-    # Coefficients in order CFx, CFy, CFz, CMx, CMy, CMz
+def aero_coefficients(alpha, beta=0, p=0, q=0, r=0, surfaces: dict = {}):
 
     static_CF, static_CM = rigid_body_static_coefficients(alpha, beta)
     dynamic_CF, dynamic_CM = rigid_body_dynamic_coefficients(alpha, p, q, r)
@@ -213,3 +221,29 @@ def aero_coefficients(alpha, beta=0, surfaces: dict = {}, p=0, q=0, r=0):
     CM = static_CM + dynamic_CM + surfaces_CM   
     
     return CF, CM
+
+def aero_forces_moments(CF, CM, airspeed, params):
+    # Calculate the aerodynamic forces and moments based on the provided coefficients and flight conditions
+    # CF: Coefficient of Forces, a vector [CFx, CFy, CFz]
+    # CM: Coefficient of Moments, a vector [CMx, CMy, CMz]
+
+    rho = params['density']
+    r_cg = params['r_cg']
+    
+    q = .5 * rho * airspeed**2
+
+    F = q * S_ref * CF
+
+    # Calculate moments
+    M = q * S_ref * np.array([b_ref * CM[0], c_ref * CM[1], b_ref * CM[2]])
+
+    # Transfer moment from the datum to the center of gravity
+    M += np.cross(r_ref - r_cg, F)
+
+    return F, M
+
+def aerodynamics_model(airspeed, alpha, beta, p, q, r, surfaces, params):
+    CF, CM = aero_coefficients(alpha, beta, p, q, r, surfaces)
+    density = params['density']
+    F, M = aero_forces_moments(CF, CM, airspeed, density)
+    return F, M

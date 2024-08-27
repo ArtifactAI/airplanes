@@ -270,11 +270,9 @@ def parse_asymmetric_control_surfaces(table_content):
     return roll_coefficient_table_df, CN_aileron_table_df
 
 
-def parse_datcom_output(file_path):
+def parse_datcom_output(file_contents: str) -> dict:
 
-    with open(file_path, 'r') as file:
-        file_content = file.read()
-    tables = extract_tables(file_content)
+    tables = extract_tables(file_contents)
     tables, table_types = get_table_type(tables)
 
     datcom_data = {}
@@ -329,5 +327,12 @@ def parse_datcom_output(file_path):
         return datcom_data
     
 if __name__ == '__main__':
-    datcom_data = parse_datcom_output('./datcom/datcom.out')
-    print(datcom_data)
+    with open('./datcom/datcom.out', 'r') as file:  
+        file_contents = file.read()
+    datcom_data = parse_datcom_output(file_contents)
+    # print(datcom_data)
+
+    import pickle
+
+    with open('./model_db.pkl', 'wb') as file:
+        pickle.dump(datcom_data, file)
