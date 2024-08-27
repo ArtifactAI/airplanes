@@ -22,17 +22,17 @@ def R_wind2bod(alpha, beta=0):
 
 current_file_path = os.path.abspath(__file__)
 current_directory = os.path.dirname(current_file_path)
-with open(os.path.join(current_directory, '.artifact', 'aero_db.pkl'), 'rb') as file:
+with open(os.path.join(current_directory, '.artifact', 'aero_database.pkl'), 'rb') as file:
     aero_db = pickle.load(file)
 
-S_ref = aero_db['reference_data']['S_ref']['value']
-b_ref = aero_db['reference_data']['b_ref']['value']
-c_ref = aero_db['reference_data']['c_ref']['value']  
+S_ref = float(aero_db['reference_data']['S_ref']['value'])
+b_ref = float(aero_db['reference_data']['b_ref']['value'])
+c_ref = float(aero_db['reference_data']['c_ref']['value'])  
 
 # Moment reference
-x_ref = aero_db['reference_data']['x_ref']['value']
-z_ref = aero_db['reference_data']['z_ref']['value']
-r_ref = [x_ref, 0, z_ref]
+x_ref = float(aero_db['reference_data']['x_ref']['value'])
+z_ref = float(aero_db['reference_data']['z_ref']['value'])
+r_ref = np.array([x_ref, 0, z_ref])
 
 configuration_data = {
     'S_ref': S_ref,
@@ -222,16 +222,14 @@ def aero_coefficients(alpha, beta=0, p=0, q=0, r=0, surfaces: dict = {}):
     
     return CF, CM
 
-def aero_forces_moments(CF, CM, airspeed, params):
+def aero_forces_moments(CF, CM, airspeed, air_density, r_cg):
     # Calculate the aerodynamic forces and moments based on the provided coefficients and flight conditions
     # CF: Coefficient of Forces, a vector [CFx, CFy, CFz]
     # CM: Coefficient of Moments, a vector [CMx, CMy, CMz]
 
-    rho = params['density']
-    r_cg = params['r_cg']
-    
-    q = .5 * rho * airspeed**2
+    q = .5 * air_density * airspeed**2
 
+    # Calculate forces
     F = q * S_ref * CF
 
     # Calculate moments
@@ -245,5 +243,6 @@ def aero_forces_moments(CF, CM, airspeed, params):
 def aerodynamics_model(airspeed, alpha, beta, p, q, r, surfaces, params):
     CF, CM = aero_coefficients(alpha, beta, p, q, r, surfaces)
     density = params['density']
-    F, M = aero_forces_moments(CF, CM, airspeed, density)
+    r_cg = params['r_cg']
+    F, M = aero_forces_moments(CF, CM, airspeed, density, r_cg)
     return F, M
