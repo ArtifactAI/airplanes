@@ -1,0 +1,159 @@
+{
+    "units": "ft",
+    "mass_properties": {
+        "x_center_of_gravity": 48.8,
+        "z_center_of_gravity": 0.0
+    },
+    "flight_condition": {
+        "mach_numbers": [
+            0.5
+        ],
+        "altitudes": [
+            0
+        ],
+        "alpha": [
+            -4.0,
+            -2.0,
+            0.0,
+            2.0,
+            4.0,
+            8.0,
+            9.0,
+            10.0,
+            12.0,
+            14.0,
+            16.0,
+            18.0
+        ]
+    },
+    "wing_planform": {
+        "x_apex_position": 34.9,
+        "z_apex_position": -1.4,
+        "alignment_angle": 1.0,
+        "root_chord": 23.3,
+        "inboard_panel_chord": 12.85,
+        "inboard_panel_semispan": 16.2,
+        "inboard_panel_sweep": 25.0,
+        "inboard_panel_dihedral": 0.0,
+        "outboard_panel_chord": 5.31,
+        "outboard_panel_semispan": 31.2,
+        "outboard_panel_sweep": 25.0,
+        "outboard_panel_dihedral": 6.0,
+        "sweep_reference_location": 0.25
+    },
+    "wing_section": {
+        "naca_4_series_code": "2412"
+    },
+    "horizontal_tail_planform": {
+        "x_apex_position": 92.15,
+        "z_apex_position": 6.2,
+        "alignment_angle": 0.0,
+        "root_chord": 11.9,
+        "inboard_panel_chord": 11.9,
+        "inboard_panel_semispan": 20.8,
+        "inboard_panel_sweep": 30.0,
+        "inboard_panel_dihedral": 7.0,
+        "outboard_panel_chord": 3.927,
+        "outboard_panel_semispan": 0.0,
+        "outboard_panel_sweep": 30.0,
+        "outboard_panel_dihedral": 7.0,
+        "sweep_reference_location": 0.25
+    },
+    "horizontal_tail_section": {
+        "naca_4_series_code": "0012"
+    },
+    "vertical_tail_planform": {
+        "x_apex_position": 81.2,
+        "z_apex_position": 5.0,
+        "root_chord": 19.0,
+        "inboard_panel_chord": 19.0,
+        "inboard_panel_semispan": 21.4,
+        "inboard_panel_sweep": 35.0,
+        "outboard_panel_chord": 4.8,
+        "outboard_panel_semispan": 0.0,
+        "outboard_panel_sweep": 35.0,
+        "sweep_reference_location": 0.25
+    },
+    "vertical_tail_section": {
+        "naca_4_series_code": "0012"
+    },
+    "fuselage": {
+        "x_stations": [
+            0.0,
+            1.38,
+            4.83,
+            6.9,
+            8.97,
+            13.8,
+            27.6,
+            70.75,
+            81.15,
+            84.55,
+            91.45,
+            98.35,
+            105.5
+        ],
+        "half_widths": [
+            0.34,
+            1.38,
+            2.76,
+            3.45,
+            4.14,
+            5.18,
+            6.21,
+            6.21,
+            5.87,
+            5.52,
+            4.14,
+            2.76,
+            0.69
+        ],
+        "ellipse_ratios": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+        ],
+        "axis_offsets": [
+            0.17,
+            0.17,
+            0,
+            0.29,
+            0.865,
+            1.205,
+            1.725,
+            1.725,
+            2.415,
+            2.76,
+            3.565,
+            4.315,
+            5.82
+        ]
+    },
+    "elevator": {
+        "deflections": [
+            -30.0,
+            -20.0,
+            -10.0,
+            -5.0,
+            0.0,
+            5.0,
+            10.0,
+            20.0,
+            25.0
+        ],
+        "inboard_chord": 2.5,
+        "outboard_chord": 1.72,
+        "inboard_span_location": 1.3,
+        "outboard_span_location": 17.4
+    }
+}
