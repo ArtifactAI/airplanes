@@ -1,4 +1,4 @@
-async def run_datcom_executable(input_file_path, output_file_path):
+def run_datcom_executable(input_file_path, output_file_path):
         # Run the datcom executable and save the .out file in the same directory as the input file
         import os, subprocess
 
