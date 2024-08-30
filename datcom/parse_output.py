@@ -139,10 +139,11 @@ def parse_table(table_content, table_type):
             data.append(row)
 
     df = pd.DataFrame(data, columns=column_names)
-    
+
     # Convert numeric columns to float
     for col in df.columns:
-        df[col] = pd.to_numeric(df[col])
+        # TODO: handle cases where entries are NA or NDM (no data method), perhaps by alerting the user
+        df[col] = pd.to_numeric(df[col], errors='coerce')
 
     # Remove rows where all values are NaN
     df = df.dropna(how='all')
