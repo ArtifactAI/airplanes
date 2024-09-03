@@ -334,7 +334,7 @@ def make_datcom_input(vehicle_config):
         datcom_str += ailerons_str
     elif control_surfaces == [False, True, True]:
         datcom_str += ailerons_str
-        datcom_str += "SAVE\nNEXT CASE\nCASEID ADD AILERONS AND EMPANNAGE\n"
+        datcom_str += "SAVE\nNEXT CASE\nCASEID ADD ELEVATOR AND EMPANNAGE\n"
         datcom_str += elevator_str
     elif control_surfaces == [True, True, True]:
         datcom_str += flaps_str

@@ -50,12 +50,14 @@ rigid_body_static_interpolator = RegularGridInterpolator(
     (alpha_values,), dependent_vars, bounds_error=False, fill_value=None
 )
 
-rigid_body_dynamic = aero_db['rigid_body_dynamic']
-alpha_values = rigid_body_dynamic['ALPHA'].values
-dependent_vars = rigid_body_dynamic.iloc[:, 1:].values
-rigid_body_dynamic_interpolator = RegularGridInterpolator(
-    (alpha_values,), dependent_vars, bounds_error=False, fill_value=None
-)
+rigid_body_dynamic_interpolator = None
+if 'rigid_body_dynamic' in aero_db:
+    rigid_body_dynamic = aero_db['rigid_body_dynamic']
+    alpha_values = rigid_body_dynamic['ALPHA'].values
+    dependent_vars = rigid_body_dynamic.iloc[:, 1:].values
+    rigid_body_dynamic_interpolator = RegularGridInterpolator(
+        (alpha_values,), dependent_vars, bounds_error=False, fill_value=None
+    )
 
 alpha_range = rigid_body_static['ALPHA'].values.tolist()
 control_surfaces = []
@@ -199,20 +201,24 @@ def asymmetric_control_surface_coefficients(alpha, deflection):
 def aero_coefficients(alpha, beta=0, p=0, q=0, r=0, surfaces: dict = {}):
 
     static_CF, static_CM = rigid_body_static_coefficients(alpha, beta)
-    dynamic_CF, dynamic_CM = rigid_body_dynamic_coefficients(alpha, p, q, r)
+
+    if rigid_body_dynamic_interpolator is not None:
+        dynamic_CF, dynamic_CM = rigid_body_dynamic_coefficients(alpha, p, q, r)
+    else:
+        dynamic_CF, dynamic_CM = np.zeros(3), np.zeros(3)
 
     surfaces_CF = np.zeros(3)
     surfaces_CM = np.zeros(3)
 
-    if 'flaps' in surfaces:
+    if 'flaps' in surfaces and 'flaps' in control_surfaces:
         flaps_CF, flaps_CM = symmetric_control_surface_coefficients('flaps', alpha, beta, surfaces['flaps'])
         surfaces_CF += flaps_CF
         surfaces_CM += flaps_CM
-    if 'elevator' in surfaces:
+    if 'elevator' in surfaces and 'elevator' in control_surfaces:
         elevator_CF, elevator_CM = symmetric_control_surface_coefficients('elevator', alpha, beta, surfaces['elevator'])
         surfaces_CF += elevator_CF
         surfaces_CM += elevator_CM
-    if 'ailerons' in surfaces:
+    if 'ailerons' in surfaces and 'ailerons' in control_surfaces:
         # Note that aileron deflection of 20 deg means +20 deg left aileron and -20 deg right aileron
         ailerons_CF, ailerons_CM = asymmetric_control_surface_coefficients(alpha, surfaces['ailerons'])
         surfaces_CF += ailerons_CF

@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from datcom.aero_model import *
+from aero_model import *
 
 def pitch_plane_dataset(coefficients):
     CF_wind = []
