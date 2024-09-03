@@ -22,7 +22,7 @@ def R_wind2bod(alpha, beta=0):
 
 current_file_path = os.path.abspath(__file__)
 current_directory = os.path.dirname(current_file_path)
-with open(os.path.join(current_directory, '.artifact', 'aero_database.pkl'), 'rb') as file:
+with open(os.path.join(current_directory, 'aero_database.pkl'), 'rb') as file:
     aero_db = pickle.load(file)
 
 S_ref = float(aero_db['reference_data']['S_ref']['value'])
