@@ -64,14 +64,22 @@ def plot_pitch_plane(datasets, labels):
 
 
 # Plot CL versus alpha
-surfaces = {
+elevator_10 = {
    'flaps' : 0,
    'elevator': np.radians(10),
    'ailerons': 0
 }
 
+elevator_n10 = {
+   'flaps' : 0,
+   'elevator': np.radians(-10),
+   'ailerons': 0
+}
+
 # Case: All surfaces zero
 coefficients = [aero_coefficients(np.radians(alpha)) for alpha in alpha_range]
-coefficients_elevator = [aero_coefficients(np.radians(alpha), surfaces=surfaces) for alpha in alpha_range]
+coefficients_elevator_10 = [aero_coefficients(np.radians(alpha), surfaces=elevator_10) for alpha in alpha_range]
+coefficients_elevator_n10 = [aero_coefficients(np.radians(alpha), surfaces=elevator_n10) for alpha in alpha_range]
 
-plot_pitch_plane([coefficients, coefficients_elevator], ['All surfaces zero', 'Elevator 10 deg'])
+
+plot_pitch_plane([coefficients, coefficients_elevator_10, coefficients_elevator_n10], ['All surfaces zero', 'Elevator 10 deg', 'Elevator -10 deg'])
