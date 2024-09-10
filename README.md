@@ -2,7 +2,7 @@
 
 # Airplane Design Library for Artifact
 
-This library is a collection of airplane design data for [Artifact](https://artifact.engineer) but is self-contained, and aircraft models can be independently compiled. Engineering Sketch Pad ([ESP](https://acdl.mit.edu/ESP/)) 3D models and US Digital Datcom ([DATCOM](https://www.pdas.com/datcom.html)) aerodynamics models can be compiled from an aircraft configuration JSON in the `configurations` directory.
+This library is a collection of airplane design data for [Artifact](https://artifact.engineer) but is self-contained, and aircraft models can be independently compiled. Engineering Sketch Pad ([ESP](https://acdl.mit.edu/ESP/)) 3D models and US Digital Datcom ([DATCOM](https://www.pdas.com/datcom.html)) aerodynamics models can be generated from an aircraft configuration JSON in the `configurations` directory.
 
 ## Usage
 
